@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Corner Shelf</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="brand">Corner Shelf</h1>
+    <nav class="nav">
+      <button class="tab is-active" data-view="shop">Shop</button>
+      <button class="tab" data-view="orders">My orders</button>
+    </nav>
+    <button class="cart-btn" id="openCart">Cart <span id="cartCount" class="count">0</span></button>
+  </header>
+
+  <main>
+    <section id="view-shop" class="view">
+      <p class="lead">Everyday things for your desk and your day.</p>
+      <p id="shopStatus" class="status">Loading products...</p>
+      <div id="products" class="grid"></div>
+    </section>
+
+    <section id="view-orders" class="view" hidden>
+      <h2>Order history</h2>
+      <p id="ordersStatus" class="status"></p>
+      <div id="orders"></div>
+    </section>
+  </main>
+
+  <div class="overlay" id="overlay" hidden></div>
+  <aside class="drawer" id="drawer" aria-label="Shopping cart" hidden>
+    <div class="drawer-head">
+      <h2>Your cart</h2>
+      <button class="link" id="closeCart">Close</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="drawer-foot">
+      <div class="total-row"><span>Total</span><strong id="cartTotal">₹0</strong></div>
+      <form id="checkoutForm" novalidate>
+        <label>Name <input id="custName" required autocomplete="name"></label>
+        <label>Email <input id="custEmail" type="email" required autocomplete="email"></label>
+        <p id="formError" class="error" role="alert"></p>
+        <button type="submit" class="primary" id="placeBtn">Place order</button>
+      </form>
+    </div>
+  </aside>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
