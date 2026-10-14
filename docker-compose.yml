@@ -1,4 +1,6 @@
+
 services:
+  # MySQL Database
   mysql:
     image: mysql:8.4
     container_name: shop-mysql
@@ -10,11 +12,13 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
       interval: 5s
       timeout: 5s
       retries: 20
+    restart: unless-stopped
 
+  # Spring Boot Backend
   backend:
     build: ./backend
     container_name: shop-backend
@@ -24,12 +28,15 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
     ports:
       - "8081:8080"
+      - "8082:8080"
     volumes:
       - shop-logs:/app/logs
     depends_on:
       mysql:
         condition: service_healthy
+    restart: unless-stopped
 
+  # Frontend
   frontend:
     build: ./frontend
     container_name: shop-frontend
@@ -37,19 +44,23 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    restart: unless-stopped
 
+  # Elasticsearch
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
     container_name: shop-elasticsearch
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
+    restart: unless-stopped
 
+  # Kibana
   kibana:
     image: docker.elastic.co/kibana/kibana:8.15.0
     container_name: shop-kibana
@@ -60,7 +71,9 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
+    restart: unless-stopped
 
+  # Logstash
   logstash:
     image: docker.elastic.co/logstash/logstash:8.15.0
     container_name: shop-logstash
@@ -72,8 +85,45 @@ services:
       - ./elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
     depends_on:
       - elasticsearch
+    restart: unless-stopped
 
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: shop-prometheus
+    ports:
+      - "9090:9090"
+      - "9091:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: shop-grafana
+    ports:
+      - "3001:3000"
+      - "3002:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+# Persistent volumes
 volumes:
   mysql-data:
   shop-logs:
   elasticsearch-data:
+  prometheus-data:
+  grafana-data:

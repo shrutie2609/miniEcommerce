@@ -1,4 +1,4 @@
-window.API_BASE = "http://localhost:8081/api";
+window.API_BASE = "http://localhost:8082/api";
 const API = window.API_BASE;
 const rupee = (n) => "₹" + Number(n).toLocaleString("en-IN");
 
