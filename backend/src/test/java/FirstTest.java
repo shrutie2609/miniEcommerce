@@ -8,7 +8,7 @@ class FirstTest {
     void testAddition() {
         int result = 10 + 20;
 
-        assertEquals(30, result);
+        assertEquals(40, result);
     }
 }
 
