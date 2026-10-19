@@ -21,11 +21,17 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t mini-ecommerce-backend:${BUILD_NUMBER} ./backend'
+            }
+        }
     }
 
     post {
         success {
-            echo 'Build and tests completed successfully!'
+            echo 'Build, tests, and Docker image build completed successfully!'
         }
         failure {
             echo 'Pipeline failed. Check the console output.'
