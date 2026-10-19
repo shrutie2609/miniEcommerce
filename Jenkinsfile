@@ -9,7 +9,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out ecommerce project'
                 checkout scm
             }
         }
@@ -31,10 +30,15 @@ pipeline {
 
     post {
         success {
-            echo 'Build, tests, and Docker image build completed successfully!'
+            echo 'Pipeline completed successfully!'
         }
+
         failure {
-            echo 'Pipeline failed. Check the console output.'
+            echo 'Pipeline failed. Check the Console Output for errors.'
+        }
+
+        always {
+            echo 'Jenkins pipeline execution finished.'
         }
     }
 }
