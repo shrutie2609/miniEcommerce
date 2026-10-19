@@ -18,7 +18,7 @@ services:
       retries: 20
     restart: unless-stopped
 
-  # Spring Boot Backend
+  # Spring Boot Backend with New Relic and Splunk
   backend:
     build: ./backend
     container_name: shop-backend
@@ -26,6 +26,8 @@ services:
       DB_URL: jdbc:mysql://mysql:3306/shopdb
       DB_USER: root
       DB_PASSWORD: ${DB_PASSWORD}
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
+      NEW_RELIC_APP_NAME: ecommerce-mini
     ports:
       - "8081:8080"
       - "8082:8080"
@@ -34,6 +36,14 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    logging:
+      driver: splunk
+      options:
+        splunk-token: "${SPLUNK_HEC_TOKEN}"
+        splunk-url: "${SPLUNK_HEC_URL}"
+        splunk-sourcetype: "docker:container"
+        splunk-insecureskipverify: "true"
+        tag: "{{.Name}}"
     restart: unless-stopped
 
   # Frontend
@@ -65,7 +75,7 @@ services:
     image: docker.elastic.co/kibana/kibana:8.15.0
     container_name: shop-kibana
     environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
       XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: "shop-elk-encryption-key-2026-learning-project-12345"
     ports:
       - "5601:5601"
